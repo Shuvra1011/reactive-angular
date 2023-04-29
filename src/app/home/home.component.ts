@@ -1,10 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {Course, sortCoursesBySeqNo} from '../model/course';
-import {interval, noop, Observable, of, throwError, timer} from 'rxjs';
+import {interval, noop, Observable, of, Subject, throwError, timer} from 'rxjs';
 import {catchError, delay, delayWhen, filter, finalize, map, retryWhen, shareReplay, tap} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {CourseDialogComponent} from '../course-dialog/course-dialog.component';
+import { BaseService } from '../@services/base.service';
 
 
 @Component({
@@ -14,29 +15,30 @@ import {CourseDialogComponent} from '../course-dialog/course-dialog.component';
 })
 export class HomeComponent implements OnInit {
 
+  beginnerCourses$: Subject<Course[]> = new Subject<Course[]>();
+
+  advancedCourses$: Subject<Course[]> = new Subject<Course[]>();
   beginnerCourses: Course[];
 
   advancedCourses: Course[];
+  courses$: Observable<Course[]>;
 
 
-  constructor(private http: HttpClient, private dialog: MatDialog) {
+  constructor(private http: HttpClient, private dialog: MatDialog, private baseService: BaseService) {
 
   }
 
   ngOnInit() {
-
-    this.http.get('/api/courses')
-      .subscribe(
-        res => {
-
-          const courses: Course[] = res["payload"].sort(sortCoursesBySeqNo);
-
-          this.beginnerCourses = courses.filter(course => course.category == "BEGINNER");
-
-          this.advancedCourses = courses.filter(course => course.category == "ADVANCED");
-
-        });
-
+    this.courses$ = this.baseService.getCourses().pipe(
+      map(courses => courses.sort(sortCoursesBySeqNo)),
+      tap((courses)=>{
+        const beginnerCourses = courses.filter(course => course.category === 'BEGINNER');
+        const advancedCourses = courses.filter(course => course.category === 'ADVANCED');
+        this.beginnerCourses$.next(beginnerCourses);
+        this.advancedCourses$.next(advancedCourses);
+      })
+    );
+    
   }
 
   editCourse(course: Course) {
