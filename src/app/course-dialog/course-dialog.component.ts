@@ -3,8 +3,9 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import {Course} from "../model/course";
 import {FormBuilder, Validators, FormGroup} from "@angular/forms";
 import * as moment from 'moment';
-import {catchError} from 'rxjs/operators';
-import {throwError} from 'rxjs';
+import {catchError, first, switchMap, tap} from 'rxjs/operators';
+import {EMPTY, Observable, fromEvent, throwError} from 'rxjs';
+import { BaseService } from '../@services/base.service';
 
 @Component({
     selector: 'course-dialog',
@@ -16,11 +17,13 @@ export class CourseDialogComponent implements AfterViewInit {
     form: FormGroup;
 
     course:Course;
-
+    saveBtnClick$: Observable<Event>;
     constructor(
         private fb: FormBuilder,
         private dialogRef: MatDialogRef<CourseDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) course:Course) {
+        @Inject(MAT_DIALOG_DATA) course:Course,
+        private baseService: BaseService
+        ) {
 
         this.course = course;
 
@@ -34,12 +37,17 @@ export class CourseDialogComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-
     }
 
-    save() {
-
+    save(): void {
       const changes = this.form.value;
+      this.baseService.saveCourse(this.course.id, changes).pipe(
+        first(),
+        tap((val)=>{
+            console.log('val', val);
+            this.dialogRef.close(val)
+        })
+      ).subscribe();
 
     }
 

@@ -10,7 +10,7 @@
           <course-card [courses]="beginnerCourses$|async"></course-card>
         </mat-tab>
         <mat-tab label="Advanced">
-          <course-card [courses]="advancedCourses$|async"></course-card>
+          <course-card [courses]="advancedCourses$|async" (courseUpdateEvent)="reloadCourses()"></course-card>
         </mat-tab>
 
     </mat-tab-group>

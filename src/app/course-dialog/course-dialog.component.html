@@ -56,14 +56,14 @@
 
 </mat-dialog-content>
 
-<mat-dialog-actions>
+<mat-dialog-actions align="end">
 
-  <button mat-raised-button
+  <button mat-raised-button class="btn"
           (click)="close()">
     Close
   </button>
 
-  <button mat-raised-button color="primary" #saveButton (click)="save()">
+  <button mat-raised-button color="primary" (click)="save()" #saveButton>
     Save
   </button>
 

@@ -16,4 +16,10 @@ export class BaseService {
             map(res => res['payload'])
         )
     }
+
+    saveCourse(courseId: string, changes: Partial<Course>): Observable<any> {
+        return this.http.put(`/api/courses/${courseId}`, changes).pipe(
+            map(res => res)
+        )
+    }
 }
